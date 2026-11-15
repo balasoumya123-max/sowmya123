@@ -1,0 +1,71 @@
+# Neural Network and Deep Learning Assignment
+
+## Student Information
+
+- **Student name:** Narra Bala Mary Sowmya
+- **Student ID:** 700782391
+- **Course:** Neural Network and Deep Learning
+- **Repository:** `sowmya123`
+
+## Overview
+
+This repository contains commented Python examples for three NLP and deep
+learning tasks:
+
+1. **NLP preprocessing:** tokenizes a sentence, removes English stopwords and
+   punctuation, and applies Porter stemming.
+2. **Named entity recognition (NER):** uses spaCy to identify entities and
+   print their text, label, and character start/end offsets.
+3. **Scaled dot-product attention:** calculates query-key scores, scales them
+   by the square root of the key dimension, applies softmax, and combines the
+   value vectors using the resulting attention weights.
+
+## Requirements
+
+- Python 3.9 or newer
+- NumPy
+- NLTK
+- spaCy and the `en_core_web_sm` English model
+
+Install the Python packages:
+
+```bash
+python -m pip install numpy nltk spacy
+```
+
+Download the spaCy English model:
+
+```bash
+python -m spacy download en_core_web_sm
+```
+
+Download the NLTK data used by the preprocessing function:
+
+```bash
+python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords')"
+```
+
+## Run
+
+From the repository directory, run:
+
+```bash
+python assignment.py
+```
+
+The script prints the original tokens, tokens without stopwords, and stemmed
+words; detected entities with labels and character offsets; and the attention
+weights and output matrix. NER results can vary with the installed spaCy model
+version. Character end offsets are exclusive, following Python's slice
+convention.
+
+## Attention calculation
+
+For query matrix `Q`, key matrix `K`, and value matrix `V`, the program uses:
+
+```text
+Attention(Q, K, V) = softmax((Q Kᵀ) / √dₖ) V
+```
+
+where `dₖ` is the key-vector dimension. Scaling keeps score magnitudes
+manageable before softmax.

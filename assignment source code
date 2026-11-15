@@ -1,0 +1,96 @@
+"""Neural Network and Deep Learning assignment examples.
+
+Includes basic NLP preprocessing, named-entity recognition, and
+scaled dot-product attention.
+"""
+
+import string
+
+import numpy as np
+import spacy
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
+
+
+def preprocess_sentence(sentence):
+    """Tokenize, remove English stopwords/punctuation, and stem a sentence."""
+    # Keep the original token list (including punctuation) for display.
+    tokens = word_tokenize(sentence)
+    print("Original Tokens:", tokens)
+
+    # Filter punctuation and common English stopwords, case-insensitively.
+    english_stopwords = set(stopwords.words("english"))
+    meaningful_tokens = [
+        token for token in tokens
+        if token not in string.punctuation
+        and token.lower() not in english_stopwords
+    ]
+    print("Tokens Without Stopwords:", meaningful_tokens)
+
+    # Porter stemming reduces words to rule-based stems.
+    stemmer = PorterStemmer()
+    stemmed_tokens = [stemmer.stem(token) for token in meaningful_tokens]
+    print("Stemmed Words:", stemmed_tokens)
+    return tokens, meaningful_tokens, stemmed_tokens
+
+
+def extract_named_entities(sentence, nlp):
+    """Print each detected entity, its label, and character offsets."""
+    doc = nlp(sentence)
+    for entity in doc.ents:
+        # spaCy's end_char is an exclusive offset, as in normal Python slices.
+        print(
+            f"Entity: {entity.text}, Label: {entity.label_}, "
+            f"Start: {entity.start_char}, End: {entity.end_char}"
+        )
+    return doc.ents
+
+
+def scaled_dot_product_attention(query, key, value):
+    """Compute scaled dot-product attention and return weights and output."""
+    # Scale by the square root of the key feature dimension.
+    key_dimension = key.shape[-1]
+    scores = (query @ key.T) / np.sqrt(key_dimension)
+
+    # Apply row-wise softmax; subtracting the maximum improves stability.
+    shifted_scores = scores - np.max(scores, axis=-1, keepdims=True)
+    exp_scores = np.exp(shifted_scores)
+    attention_weights = exp_scores / np.sum(exp_scores, axis=-1, keepdims=True)
+
+    # Each query's output is the weighted sum of the value vectors.
+    output = attention_weights @ value
+    return attention_weights, output
+
+
+def main():
+    """Run the three assignment examples with the provided input sentences."""
+    preprocessing_sentence = (
+        "NLP techniques are used in virtual assistants like Alexa and Siri."
+    )
+    print("Q1: NLP Preprocessing")
+    preprocess_sentence(preprocessing_sentence)
+
+    ner_sentence = (
+        "LeBron James as the NBA player of the United States in Laker "
+        "and won the NBA Final MVP in 2020."
+    )
+    print("\nQ2: Named Entity Recognition")
+    # Load the small English model installed via the README instructions.
+    nlp = spacy.load("en_core_web_sm")
+    extract_named_entities(ner_sentence, nlp)
+
+    query = np.array([[1, 0, 1, 0], [0, 1, 0, 1]], dtype=float)
+    key = np.array([[1, 0, 1, 0], [0, 1, 0, 1]], dtype=float)
+    value = np.array([[1, 2, 3, 4], [5, 6, 7, 8]], dtype=float)
+
+    print("\nQ3: Scaled Dot-Product Attention")
+    weights, attention_output = scaled_dot_product_attention(query, key, value)
+    print("Attention weights:")
+    print(np.round(weights, 3))
+    print("Output:")
+    print(np.round(attention_output, 3))
+
+
+if __name__ == "__main__":
+    main()
